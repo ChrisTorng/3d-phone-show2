@@ -6,6 +6,15 @@
     <title>3D 手機展示</title>
     <link rel="stylesheet" href="css/style.css">
     <meta name="description" content="互動式 3D 手機展示平台，使用 Three.js 建立">
+    <!-- 新增 importmap，解決模組解析問題 -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.174.0/build/three.module.js",
+            "three/examples/": "https://cdn.jsdelivr.net/npm/three@0.174.0/examples/"
+        }
+    }
+    </script>
 </head>
 <body>
     <div id="container"></div>
