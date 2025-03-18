@@ -6,6 +6,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // 全域變數
 let camera, scene, renderer, controls;
@@ -13,8 +14,6 @@ let phone;
 let composer;
 let bloomPass, bokehPass;
 let autoRotate = true;
-let phoneColor = 0x000000;
-let screenColor = 0x2196F3;
 let envMap;
 let gui;
 
@@ -90,9 +89,6 @@ function loadEnvironmentMap() {
             texture.mapping = THREE.EquirectangularReflectionMapping;
             envMap = texture;
             scene.environment = texture;
-            
-            // 環境貼圖載入後建立手機模型
-            createPhoneModel();
         });
 }
 
@@ -166,22 +162,6 @@ function setupGUI() {
     
     const phoneFolder = gui.addFolder('手機設定');
     
-    // 手機顏色控制
-    phoneFolder.addColor({ color: phoneColor }, 'color')
-        .name('手機顏色')
-        .onChange(function(color) {
-            phoneColor = color;
-            updatePhoneMaterials();
-        });
-    
-    // 螢幕顏色控制
-    phoneFolder.addColor({ color: screenColor }, 'color')
-        .name('螢幕顏色')
-        .onChange(function(color) {
-            screenColor = color;
-            updatePhoneMaterials();
-        });
-    
     const effectsFolder = gui.addFolder('效果設定');
     
     // 自動旋轉控制
@@ -216,151 +196,21 @@ function setupGUI() {
     effectsFolder.open();
 }
 
-// 更新手機材質
-function updatePhoneMaterials() {
-    if (!phone) return;
-    
-    // 更新手機本體材質
-    phone.material.color.set(phoneColor);
-    
-    // 更新螢幕材質
-    const screen = phone.children.find(child => child.userData.isScreen);
-    if (screen) {
-        screen.material.color.set(screenColor);
-        screen.material.emissive.set(screenColor);
-    }
-}
-
-// 建立簡單的手機模型
-function createPhoneModel() {
-    // 確保環境貼圖已載入
-    if (!envMap) {
-        console.warn('環境貼圖尚未載入');
-        return;
-    }
-
-    // 手機本體 - 一個長方體
-    const phoneGeometry = new THREE.BoxGeometry(0.8, 1.6, 0.1);
-    const phoneMaterial = new THREE.MeshPhysicalMaterial({ 
-        color: phoneColor,
-        metalness: 0.9,
-        roughness: 0.2,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.1,
-        envMap: envMap,
-        envMapIntensity: 1.0,
-        reflectivity: 1.0
+// 載入手機模型
+function loadPhoneModel(modelPath) {
+    const loader = new GLTFLoader();
+    loader.load(modelPath, function(gltf) {
+        phone = gltf.scene;
+        phone.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        });
+        scene.add(phone);
+    }, undefined, function(error) {
+        console.error('載入模型時發生錯誤:', error);
     });
-    phone = new THREE.Mesh(phoneGeometry, phoneMaterial);
-    phone.castShadow = true;
-    phone.receiveShadow = true;
-    scene.add(phone);
-
-    // 手機圓角邊緣
-    const edges = new THREE.EdgesGeometry(phoneGeometry);
-    const edgeMaterial = new THREE.LineBasicMaterial({ 
-        color: 0x888888,
-        transparent: true,
-        opacity: 0.3
-    });
-    const wireframe = new THREE.LineSegments(edges, edgeMaterial);
-    phone.add(wireframe);
-
-    // 手機邊框 - 略微大於手機本體的長方體，但厚度更薄
-    const frameBevelRadius = 0.05;
-    const frameGeometry = new THREE.BoxGeometry(0.84, 1.64, 0.12);
-    const frameMaterial = new THREE.MeshPhysicalMaterial({ 
-        color: 0xcccccc,
-        metalness: 0.8,
-        roughness: 0.2,
-        clearcoat: 1.0,
-        envMap: envMap,
-        transparent: true,
-        opacity: 0.3
-    });
-    const frame = new THREE.Mesh(frameGeometry, frameMaterial);
-    frame.castShadow = true;
-    frame.position.z = -0.01;
-    phone.add(frame);
-
-    // 螢幕 - 稍微在手機前方的長方體
-    const screenGeometry = new THREE.BoxGeometry(0.75, 1.5, 0.01);
-    const screenMaterial = new THREE.MeshPhysicalMaterial({ 
-        color: screenColor,
-        roughness: 0.1,
-        metalness: 0.0,
-        emissive: screenColor,
-        emissiveIntensity: 0.5,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.1,
-        envMap: envMap,
-        envMapIntensity: 1.0,
-        transmission: 0.95,
-        transparent: true
-    });
-    const screen = new THREE.Mesh(screenGeometry, screenMaterial);
-    screen.position.z = 0.055;
-    screen.castShadow = true;
-    screen.receiveShadow = true;
-    screen.userData.isScreen = true; // 標記螢幕物件以便後續更新
-    phone.add(screen);
-
-    // 相機鏡頭 - 小圓柱體
-    const cameraGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.01, 16);
-    const cameraMaterial = new THREE.MeshPhysicalMaterial({ 
-        color: 0x111111, 
-        metalness: 1.0,
-        roughness: 0.1,
-        envMap: envMap,
-    });
-    const phoneCam = new THREE.Mesh(cameraGeometry, cameraMaterial);
-    phoneCam.position.set(0.2, 0.7, 0.06);
-    phoneCam.rotation.x = Math.PI / 2;
-    phoneCam.castShadow = true;
-    phoneCam.receiveShadow = true;
-    phone.add(phoneCam);
-
-    // 鏡頭邊緣
-    const cameraRingGeometry = new THREE.TorusGeometry(0.055, 0.01, 8, 24);
-    const cameraRingMaterial = new THREE.MeshPhysicalMaterial({ 
-        color: 0xdddddd, 
-        metalness: 1.0,
-        roughness: 0.1,
-        envMap: envMap,
-    });
-    const cameraRing = new THREE.Mesh(cameraRingGeometry, cameraRingMaterial);
-    cameraRing.position.set(0.2, 0.7, 0.065);
-    cameraRing.rotation.x = Math.PI / 2;
-    phone.add(cameraRing);
-
-    // 按鈕 - 側邊的小長方體
-    const buttonGeometry = new THREE.BoxGeometry(0.02, 0.1, 0.05);
-    const buttonMaterial = new THREE.MeshPhysicalMaterial({ 
-        color: 0x555555,
-        metalness: 0.8,
-        roughness: 0.2,
-        envMap: envMap,
-    });
-    
-    // 電源鍵
-    const powerButton = new THREE.Mesh(buttonGeometry, buttonMaterial);
-    powerButton.position.set(0.41, 0.3, 0);
-    powerButton.castShadow = true;
-    powerButton.receiveShadow = true;
-    phone.add(powerButton);
-    
-    // 音量鍵
-    const volUpButton = new THREE.Mesh(buttonGeometry, buttonMaterial);
-    volUpButton.position.set(0.41, 0.5, 0);
-    volUpButton.castShadow = true;
-    volUpButton.receiveShadow = true;
-    phone.add(volUpButton);
-    
-    const volDownButton = new THREE.Mesh(buttonGeometry, buttonMaterial);
-    volDownButton.position.set(0.41, 0.65, 0);
-    volDownButton.castShadow = true;
-    volDownButton.receiveShadow = true;
-    phone.add(volDownButton);
 }
 
 // 新增地板網格以增強 3D 空間感
@@ -411,4 +261,6 @@ function animate() {
 document.addEventListener('DOMContentLoaded', function() {
     init();
     animate();
+    // 載入給定的手機模型
+    loadPhoneModel('models/iphone_16_pro_max.glb');
 });
