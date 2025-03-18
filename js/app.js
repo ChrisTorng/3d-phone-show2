@@ -44,9 +44,6 @@ function init() {
     renderer.outputEncoding = THREE.sRGBEncoding;
     document.getElementById('container').appendChild(renderer.domElement);
 
-    // 載入環境貼圖
-    loadEnvironmentMap();
-
     // 建立燈光
     setupLights();
 
@@ -66,14 +63,14 @@ function init() {
     // 建立 GUI 控制面板
     setupGUI();
 
-    // 因為沒有實際的手機模型檔案，我們使用基本幾何體建立一個簡單的手機模型
-    createPhoneModel();
-
     // 處理視窗大小變更
     window.addEventListener('resize', onWindowResize);
 
     // 新增地板網格以增強 3D 空間感
     addFloor();
+
+    // 載入環境貼圖
+    loadEnvironmentMap();
 }
 
 // 載入環境貼圖
@@ -85,11 +82,8 @@ function loadEnvironmentMap() {
             envMap = texture;
             scene.environment = texture;
             
-            // 環境貼圖載入後重新建立手機模型以應用新材質
-            if (phone) {
-                scene.remove(phone);
-                createPhoneModel();
-            }
+            // 環境貼圖載入後建立手機模型
+            createPhoneModel();
         });
 }
 
@@ -230,6 +224,12 @@ function updatePhoneMaterials() {
 
 // 建立簡單的手機模型
 function createPhoneModel() {
+    // 確保環境貼圖已載入
+    if (!envMap) {
+        console.warn('環境貼圖尚未載入');
+        return;
+    }
+
     // 手機本體 - 一個長方體
     const phoneGeometry = new THREE.BoxGeometry(0.8, 1.6, 0.1);
     const phoneMaterial = new THREE.MeshPhysicalMaterial({ 
