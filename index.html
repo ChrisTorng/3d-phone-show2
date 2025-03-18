@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D 手機展示</title>
+    <link rel="stylesheet" href="css/style.css">
+    <meta name="description" content="互動式 3D 手機展示平台，使用 Three.js 建立">
+</head>
+<body>
+    <div id="container"></div>
+    <div id="info">
+        <h1>3D 手機展示</h1>
+        <p>使用滑鼠拖曳進行旋轉，滾輪進行縮放。使用控制面板來調整手機顏色和視覺效果。</p>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">載入中...</div>
+        </div>
+    </div>
+
+    <!-- 引入自訂 JavaScript，使用 module 方式 -->
+    <script type="module" src="js/app.js"></script>
+    
+    <script>
+    // 等待模型和資源載入完成後隱藏載入提示
+    document.addEventListener('DOMContentLoaded', function() {
+        // 簡單的載入動畫，實際上會由 app.js 中載入完成後移除
+        setTimeout(() => {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.opacity = '0';
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+            }, 500);
+        }, 1500);
+    });
+    </script>
+</body>
+</html>
