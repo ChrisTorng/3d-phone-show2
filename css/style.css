@@ -1,3 +1,4 @@
+/* 全域樣式設定 */
 body {
     margin: 0;
     padding: 0;
@@ -7,6 +8,7 @@ body {
     color: #ffffff;
 }
 
+/* 3D 場景容器樣式 */
 #container {
     position: absolute;
     width: 100%;
@@ -14,6 +16,7 @@ body {
     overflow: hidden;
 }
 
+/* 資訊區域樣式 */
 #info {
     position: absolute;
     top: 10px;
@@ -33,6 +36,7 @@ body {
     -webkit-backdrop-filter: blur(5px);
 }
 
+/* 資訊區域標題樣式 */
 #info h1 {
     margin: 0;
     padding: 5px 0;
@@ -45,6 +49,7 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
+/* 資訊區域文字樣式 */
 #info p {
     margin: 5px 0 0 0;
     padding: 0 10px 10px;
@@ -96,7 +101,7 @@ body {
     background: rgba(80, 180, 255, 0.8);
 }
 
-/* 載入提示 */
+/* 載入提示樣式 */
 .loading-overlay {
     position: fixed;
     top: 0;

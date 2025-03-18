@@ -5,6 +5,10 @@ app = Flask(__name__)
 
 @app.route('/api/phones', methods=['GET'])
 def get_phones():
+    """
+    取得所有手機模型的資訊。
+    返回一個包含手機模型資訊的 JSON 陣列。
+    """
     phones = [
         {
             'model': 'models/iphone_16_pro_max.glb',
@@ -29,10 +33,16 @@ def get_phones():
 
 @app.route('/', methods=['GET'])
 def serve_index():
+    """
+    提供 index.html 檔案。
+    """
     return send_from_directory('.', 'index.html')
 
 @app.route('/<path:path>', methods=['GET'])
 def serve_static(path):
+    """
+    提供靜態檔案。
+    """
     return send_from_directory(os.path.abspath(os.path.dirname(__file__)), f'./{path}')
 
 if __name__ == '__main__': 
