@@ -21,7 +21,7 @@ let gui;
 function init() {
     // 建立場景
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x111111);
+    scene.background = new THREE.Color(0x888888);
     
     // 建立相機
     camera = new THREE.PerspectiveCamera(
@@ -268,7 +268,7 @@ function addFloor() {
     // 建立鏡面地板
     const floorGeometry = new THREE.CircleGeometry(7, 50);
     const floorMaterial = new THREE.MeshPhysicalMaterial({ 
-        color: 0xffffff,
+        color: 0xaaaaaa,
         metalness: 0.2,
         roughness: 0.1,
         envMap: envMap,
@@ -283,7 +283,7 @@ function addFloor() {
     scene.add(floor);
     
     // 建立網格地板
-    const gridHelper = new THREE.GridHelper(10, 20, 0x555555, 0x333333);
+    const gridHelper = new THREE.GridHelper(10, 20, 0xaaaaaa, 0x888888);
     gridHelper.position.y = -1.79;
     gridHelper.material.opacity = 0.3;
     gridHelper.material.transparent = true;
