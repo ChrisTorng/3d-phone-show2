@@ -196,62 +196,8 @@ function setupGUI() {
     effectsFolder.open();
 }
 
-// 載入手機模型
-function loadPhoneModel(modelPath) {
-    const loader = new GLTFLoader();
-    loader.load(modelPath, function(gltf) {
-        phone = gltf.scene;
-        phone.traverse(function(child) {
-            if (child.isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
-            }
-        });
-        scene.add(phone);
-    }, undefined, function(error) {
-        console.error('載入模型時發生錯誤:', error);
-    });
-}
-
-// 載入手機模型並設定位置
-function loadPhoneModelWithPosition(modelPath, position) {
-    const loader = new GLTFLoader();
-    loader.load(modelPath, function(gltf) {
-        const phoneModel = gltf.scene;
-        phoneModel.position.set(position.x, position.y, position.z);
-        phoneModel.traverse(function(child) {
-            if (child.isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
-            }
-        });
-        scene.add(phoneModel);
-    }, undefined, function(error) {
-        console.error('載入模型時發生錯誤:', error);
-    });
-}
-
-// 載入手機模型並設定位置和縮放比率
-function loadPhoneModelWithPositionAndScale(modelPath, position, scale) {
-    const loader = new GLTFLoader();
-    loader.load(modelPath, function(gltf) {
-        const phoneModel = gltf.scene;
-        phoneModel.position.set(position.x, position.y, position.z);
-        phoneModel.scale.set(scale, scale, scale);
-        phoneModel.traverse(function(child) {
-            if (child.isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
-            }
-        });
-        scene.add(phoneModel);
-    }, undefined, function(error) {
-        console.error('載入模型時發生錯誤:', error);
-    });
-}
-
-// 載入手機模型並設定位置、縮放比率和旋轉角度
-function loadPhoneModelWithPositionScaleAndRotation(modelPath, position, scale, rotation) {
+// 載入手機模型並設定位置、縮放比率和旋轉角度，並顯示名稱
+function loadPhoneModelWithPositionScaleRotationAndName(modelPath, position, scale, rotation, name) {
     const loader = new GLTFLoader();
     loader.load(modelPath, function(gltf) {
         const phoneModel = gltf.scene;
@@ -265,6 +211,20 @@ function loadPhoneModelWithPositionScaleAndRotation(modelPath, position, scale, 
             }
         });
         scene.add(phoneModel);
+
+        // 建立名稱文字
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        context.font = '48px Arial';
+        context.fillStyle = 'white';
+        context.fillText(name, 10, 50);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+        const sprite = new THREE.Sprite(spriteMaterial);
+        sprite.position.set(position.x, position.y + 1.5, position.z);
+        sprite.scale.set(2, 1, 1);
+        scene.add(sprite);
     }, undefined, function(error) {
         console.error('載入模型時發生錯誤:', error);
     });
@@ -276,11 +236,12 @@ function loadAllPhoneModels() {
         .then(response => response.json())
         .then(models => {
             models.forEach(model => {
-                loadPhoneModelWithPositionScaleAndRotation(
+                loadPhoneModelWithPositionScaleRotationAndName(
                     model.model,
                     model.position,
                     model.scale,
-                    model.rotation
+                    model.rotation,
+                    model.details.name
                 );
             });
         })
