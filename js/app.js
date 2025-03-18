@@ -196,8 +196,20 @@ function setupGUI() {
     effectsFolder.open();
 }
 
+// 計算模型的最高位置
+function calculateHighestPosition(models) {
+    let highestY = -Infinity;
+    models.forEach(model => {
+        const modelHeight = model.position.y * model.scale;
+        if (modelHeight > highestY) {
+            highestY = modelHeight;
+        }
+    });
+    return highestY;
+}
+
 // 載入手機模型並設定位置、縮放比率和旋轉角度，並顯示名稱
-function loadPhoneModelWithPositionScaleRotationAndName(modelPath, position, scale, rotation, name) {
+function loadPhoneModelWithPositionScaleRotationAndName(modelPath, position, scale, rotation, name, highestY) {
     const loader = new GLTFLoader();
     loader.load(modelPath, function(gltf) {
         const phoneModel = gltf.scene;
@@ -215,14 +227,15 @@ function loadPhoneModelWithPositionScaleRotationAndName(modelPath, position, sca
         // 建立名稱文字
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
-        context.font = '48px Arial';
+        
+        context.font = '24px Arial';
         context.fillStyle = 'white';
-        context.fillText(name, 10, 50);
+        context.fillText(name, 10, 40);
 
         const texture = new THREE.CanvasTexture(canvas);
         const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
         const sprite = new THREE.Sprite(spriteMaterial);
-        sprite.position.set(position.x, position.y + 1.5, position.z);
+        sprite.position.set(position.x, highestY + 0.8, position.z);
         sprite.scale.set(2, 1, 1);
         scene.add(sprite);
     }, undefined, function(error) {
@@ -235,13 +248,15 @@ function loadAllPhoneModels() {
     fetch('/api/phones')
         .then(response => response.json())
         .then(models => {
+            const highestY = calculateHighestPosition(models);
             models.forEach(model => {
                 loadPhoneModelWithPositionScaleRotationAndName(
                     model.model,
                     model.position,
                     model.scale,
                     model.rotation,
-                    model.details.name
+                    model.details.name,
+                    highestY
                 );
             });
         })
