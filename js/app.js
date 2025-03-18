@@ -250,7 +250,27 @@ function loadPhoneModelWithPositionAndScale(modelPath, position, scale) {
     });
 }
 
-// 修改 loadAllPhoneModels 函式以包含縮放比率
+// 載入手機模型並設定位置、縮放比率和旋轉角度
+function loadPhoneModelWithPositionScaleAndRotation(modelPath, position, scale, rotation) {
+    const loader = new GLTFLoader();
+    loader.load(modelPath, function(gltf) {
+        const phoneModel = gltf.scene;
+        phoneModel.position.set(position.x, position.y, position.z);
+        phoneModel.scale.set(scale, scale, scale);
+        phoneModel.rotation.set(rotation.x, rotation.y, rotation.z);
+        phoneModel.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        });
+        scene.add(phoneModel);
+    }, undefined, function(error) {
+        console.error('載入模型時發生錯誤:', error);
+    });
+}
+
+// 修改 loadAllPhoneModels 函式以包含旋轉角度
 function loadAllPhoneModels() {
     const models = [
         'models/iphone_16_pro_max.glb',
@@ -270,8 +290,14 @@ function loadAllPhoneModels() {
         1.5 // Samsung Galaxy Z Flip 3
     ];
 
+    const rotations = [
+        { x: 0, y: Math.PI / 2, z: 0 }, // iPhone 16 Pro Max 右轉 90 度
+        { x: 0, y: 0, z: 0 }, // Samsung Galaxy S22 Ultra
+        { x: 0, y: Math.PI, z: 0 } // Samsung Galaxy Z Flip 3 旋轉 180 度
+    ];
+
     models.forEach((model, index) => {
-        loadPhoneModelWithPositionAndScale(model, positions[index], scales[index]);
+        loadPhoneModelWithPositionScaleAndRotation(model, positions[index], scales[index], rotations[index]);
     });
 }
 
