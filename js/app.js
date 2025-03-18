@@ -213,6 +213,68 @@ function loadPhoneModel(modelPath) {
     });
 }
 
+// 載入手機模型並設定位置
+function loadPhoneModelWithPosition(modelPath, position) {
+    const loader = new GLTFLoader();
+    loader.load(modelPath, function(gltf) {
+        const phoneModel = gltf.scene;
+        phoneModel.position.set(position.x, position.y, position.z);
+        phoneModel.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        });
+        scene.add(phoneModel);
+    }, undefined, function(error) {
+        console.error('載入模型時發生錯誤:', error);
+    });
+}
+
+// 載入手機模型並設定位置和縮放比率
+function loadPhoneModelWithPositionAndScale(modelPath, position, scale) {
+    const loader = new GLTFLoader();
+    loader.load(modelPath, function(gltf) {
+        const phoneModel = gltf.scene;
+        phoneModel.position.set(position.x, position.y, position.z);
+        phoneModel.scale.set(scale, scale, scale);
+        phoneModel.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        });
+        scene.add(phoneModel);
+    }, undefined, function(error) {
+        console.error('載入模型時發生錯誤:', error);
+    });
+}
+
+// 修改 loadAllPhoneModels 函式以包含縮放比率
+function loadAllPhoneModels() {
+    const models = [
+        'models/iphone_16_pro_max.glb',
+        'models/samsung_galaxy_s22_ultra.glb',
+        'models/Samsung_Galaxy_Z_Flip_3.glb'
+    ];
+
+    const positions = [
+        { x: -2, y: 0, z: 0 },
+        { x: 0, y: -0.8, z: 0 },
+        { x: 2, y: 0, z: 0 }
+    ];
+
+    const scales = [
+        1, // iPhone 16 Pro Max
+        0.3, // Samsung Galaxy S22 Ultra
+        1.5 // Samsung Galaxy Z Flip 3
+    ];
+
+    models.forEach((model, index) => {
+        loadPhoneModelWithPositionAndScale(model, positions[index], scales[index]);
+    });
+}
+
 // 新增地板網格以增強 3D 空間感
 function addFloor() {
     // 建立鏡面地板
@@ -261,6 +323,6 @@ function animate() {
 document.addEventListener('DOMContentLoaded', function() {
     init();
     animate();
-    // 載入給定的手機模型
-    loadPhoneModel('models/iphone_16_pro_max.glb');
+    // 載入全部手機模型
+    loadAllPhoneModels();
 });
