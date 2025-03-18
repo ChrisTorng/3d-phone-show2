@@ -270,35 +270,21 @@ function loadPhoneModelWithPositionScaleAndRotation(modelPath, position, scale, 
     });
 }
 
-// 修改 loadAllPhoneModels 函式以包含旋轉角度
+// 從 API 取得手機資料並載入模型
 function loadAllPhoneModels() {
-    const models = [
-        'models/iphone_16_pro_max.glb',
-        'models/samsung_galaxy_s22_ultra.glb',
-        'models/Samsung_Galaxy_Z_Flip_3.glb'
-    ];
-
-    const positions = [
-        { x: -2, y: 0, z: 0 },
-        { x: 0, y: -0.8, z: 0 },
-        { x: 2, y: 0, z: 0 }
-    ];
-
-    const scales = [
-        1, // iPhone 16 Pro Max
-        0.3, // Samsung Galaxy S22 Ultra
-        1.5 // Samsung Galaxy Z Flip 3
-    ];
-
-    const rotations = [
-        { x: 0, y: Math.PI / 2, z: 0 }, // iPhone 16 Pro Max 右轉 90 度
-        { x: 0, y: 0, z: 0 }, // Samsung Galaxy S22 Ultra
-        { x: 0, y: Math.PI, z: 0 } // Samsung Galaxy Z Flip 3 旋轉 180 度
-    ];
-
-    models.forEach((model, index) => {
-        loadPhoneModelWithPositionScaleAndRotation(model, positions[index], scales[index], rotations[index]);
-    });
+    fetch('/api/phones')
+        .then(response => response.json())
+        .then(models => {
+            models.forEach(model => {
+                loadPhoneModelWithPositionScaleAndRotation(
+                    model.model,
+                    model.position,
+                    model.scale,
+                    model.rotation
+                );
+            });
+        })
+        .catch(error => console.error('取得手機資料時發生錯誤:', error));
 }
 
 // 新增地板網格以增強 3D 空間感
