@@ -57,6 +57,15 @@ function init() {
     controls.autoRotate = autoRotate;
     controls.autoRotateSpeed = 1.0;
 
+    // 檢測滑鼠拖曳和滾輪事件
+    controls.addEventListener('start', function() {
+        controls.autoRotate = false;
+        const autoRotateController = gui.folders[1].controllers.find(controller => controller.property === 'autoRotate');
+        if (autoRotateController) {
+            autoRotateController.setValue(false);
+        }
+    });
+
     // 建立後處理效果
     setupPostProcessing();
 
