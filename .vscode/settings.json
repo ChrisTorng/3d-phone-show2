@@ -3,5 +3,10 @@
         {
             "file": ".copilot/codeGeneration-instructions.md"
         }
-    ]
+    ],
+    "python.testing.pytestArgs": [
+        "pytests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
